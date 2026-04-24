@@ -1,7 +1,7 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { useProducts } from '../hooks/useProducts';
+import { mockProducts } from '../data/mockProducts';
 import ProductGrid from '../components/product/ProductGrid';
 
 export default function SearchPage() {
@@ -11,8 +11,16 @@ export default function SearchPage() {
 
   useEffect(() => { setInput(q); }, [q]);
 
-  const { data, isLoading } = useProducts({ first: 12, query: q ? `title:*${q}* OR tag:${q}` : undefined });
-  const products = data?.edges.map(e => e.node) ?? [];
+  const results = useMemo(() => {
+    if (!q) return mockProducts;
+    const lower = q.toLowerCase();
+    return mockProducts.filter(p =>
+      p.title.toLowerCase().includes(lower) ||
+      p.description.toLowerCase().includes(lower) ||
+      p.vendor.toLowerCase().includes(lower) ||
+      p.productType.toLowerCase().includes(lower)
+    );
+  }, [q]);
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -20,37 +28,28 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <form onSubmit={handleSearch} className="mb-8">
-        <div className="flex border-2 border-azul-medio rounded-xl overflow-hidden max-w-2xl mx-auto">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Buscar produtos..."
-            className="flex-1 px-5 py-4 text-lg outline-none"
-          />
-          <button type="submit" className="bg-azul-medio px-6 flex items-center text-white hover:bg-azul-escuro transition-colors">
-            <Search size={22} />
+    <div className="max-w-7xl mx-auto px-4 py-10">
+      <form onSubmit={handleSearch} className="mb-10">
+        <div className="flex border-2 border-azul-600 rounded-2xl overflow-hidden max-w-2xl mx-auto shadow-azul">
+          <input type="text" value={input} onChange={e => setInput(e.target.value)}
+            placeholder="Buscar produtos, marcas, categorias..."
+            className="flex-1 px-6 py-4 text-lg outline-none" />
+          <button type="submit" className="bg-azul-600 px-7 flex items-center text-white hover:bg-azul-800 transition-colors">
+            <Search size={24} />
           </button>
         </div>
       </form>
 
       {q && (
-        <h2 className="font-display font-bold text-2xl text-azul-escuro mb-5">
-          Resultados para: <span className="text-azul-medio">"{q}"</span>
+        <h2 className="font-display font-bold text-2xl text-azul-800 mb-6">
+          {results.length > 0 ? `${results.length} resultado${results.length !== 1 ? 's' : ''} para:` : 'Nenhum resultado para:'}{' '}
+          <span className="text-azul-600">"{q}"</span>
         </h2>
       )}
 
-      {!isLoading && !products.length && q ? (
-        <div className="text-center py-12 text-gray-500">
-          <div className="text-5xl mb-3">🔍</div>
-          <p className="font-semibold text-lg">Nenhum resultado para "{q}"</p>
-          <p className="text-sm mt-2">Tente palavras-chave diferentes ou navegue pelas categorias.</p>
-        </div>
-      ) : (
-        <ProductGrid products={products} loading={isLoading} />
-      )}
+      {!q && <p className="text-cinza-700 text-center mb-8">Digite algo para buscar produtos.</p>}
+
+      <ProductGrid products={results} />
     </div>
   );
 }
