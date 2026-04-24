@@ -1,0 +1,14 @@
+﻿{
+  "name": "Página Inicial",
+  "sections": {
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Produtos em Destaque"
+      }
+    }
+  },
+  "order": [
+    "featured_collection"
+  ]
+}

@@ -1,1 +1,13 @@
-[]
+﻿[
+  {
+    "name": "Cores",
+    "settings": [
+      {
+        "type": "color",
+        "id": "primary_color",
+        "label": "Cor Principal",
+        "default": "#0D3B8C"
+      }
+    ]
+  }
+]
